@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Oil Manufacturing Industry Dashboard</title>
+    <link rel="stylesheet" href="static/IndustryDashboard.css">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        .count-display {
+            transition: all 0.3s ease;
+        }
+        
+        .count-display.changed {
+            animation: pulse 0.5s ease-in-out, bounce 0.5s ease-in-out;
+            color: #10b981;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <div class="header">
+            <div class="header-content">
+                <h1 style="color: white;">Oil Manufacturing Industry Dashboard</h1>
+                <a href="/cost-entry" class="cost-entry-button">Go to Cost Entry</a>
+                <div class="clock">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                    <span id="current-time">00:00:00</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="metrics-grid">
+                <div class="metric-card blue">
+                    <div class="metric-content">
+                        <div>
+                            <p>Current Power Usage</p>
+                            <h3 id="power-usage">15.0 kW/min</h3>
+                        </div>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm3.61 9.58l-5.84 5.84"></path>
+                        </svg>
+                    </div>
+                </div>
+
+                <div class="metric-card green">
+                    <div class="metric-content">
+                        <div>
+                            <p>Profit Per Minute</p>
+                            <h3 id="profit">₹0.00</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="metric-card purple">
+                    <div class="metric-content">
+                        <div>
+                            <p>Overall Efficiency</p>
+                            <h3 id="efficiency">88%</h3>
+                        </div>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
+                            <path d="M17 6.1H3"></path>
+                            <path d="M21 12.1H7"></path>
+                            <path d="M15 18.1H3"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NEW: Large Animated Product Count Display -->
+            <div class="text-center bg-gray-100 p-6 mb-6 rounded-lg shadow-md">
+                <h2 class="text-2xl font-semibold mb-4">Product Count Tracking</h2>
+                <div id="product-count-container" class="flex flex-col items-center">
+                    <div 
+                        id="product-count-display" 
+                        class="count-display text-9xl font-bold text-blue-600 transition-all duration-300"
+                    >
+                        0
+                    </div>
+                    <p class="mt-4 text-xl text-gray-600">Coconut Oil Bottles Produced</p>
+                </div>
+            </div>
+
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <h2>Power Consumption Trend</h2>
+                    <div class="chart-container">
+                        <canvas id="power-chart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-card">
+                    <h2>Monthly Production vs Target</h2>
+                    <div class="chart-container">
+                        <canvas id="production-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="machine-status">
+                <h2>Machine Status</h2>
+                <div class="machine-grid">
+                    <div class="machine-card">
+                        <div class="machine-header">
+                            <h3>Cold Press</h3>
+                        </div>
+                        <div class="machine-details">
+                            <p>Power: 5 kW/min</p>
+                            <p>Efficiency: 92%</p>
+                            <p class="status-operational">Status: Operational</p>
+                        </div>
+                    </div>
+                    <div class="machine-card">
+                        <div class="machine-header">
+                            <h3>Filtration</h3>
+                        </div>
+                        <div class="machine-details">
+                            <p>Power: 2 kW/min</p>
+                            <p>Efficiency: 88%</p>
+                            <p class="status-operational">Status: Operational</p>
+                        </div>
+                    </div>
+                    <div class="machine-card">
+                        <div class="machine-header">
+                            <h3>Refining</h3>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="warning-icon">
+                                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                                <line x1="12" y1="9" x2="12" y2="13"></line>
+                                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                            </svg>
+                        </div>
+                        <div class="machine-details">
+                            <p>Power: 4 kW/min</p>
+                            <p>Efficiency: 75%</p>
+                            <p class="status-maintenance">Status: Maintenance Required</p>
+                        </div>
+                    </div>
+                    <div class="machine-card">
+                        <div class="machine-header">
+                            <h3>Bottling</h3>
+                        </div>
+                        <div class="machine-details">
+                            <p>Power: 3 kW/min</p>
+                            <p>Efficiency: 95%</p>
+                            <p class="status-operational">Status: Operational</p>
+                        </div>
+                    </div>
+                    <div class="machine-card">
+                        <div class="machine-header">
+                            <h3>Waste Management</h3>
+                        </div>
+                        <div class="machine-details">
+                            <p>Power: 1 kW/min</p>
+                            <p>Efficiency: 90%</p>
+                            <p class="status-operational">Status: Operational</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Time update
+        function updateTime() {
+            const timeElement = document.getElementById('current-time');
+            timeElement.textContent = new Date().toLocaleTimeString();
+        }
+        setInterval(updateTime, 1000);
+
+        // Dynamic dashboard metrics
+        const powerUsageEl = document.getElementById('power-usage');
+        const profitEl = document.getElementById('profit');
+        const efficiencyEl = document.getElementById('efficiency');
+
+        // Track previous count to detect changes
+        let previousCount = 0;
+
+        // Product Count Update Function
+        function updateProductCount() {
+            fetch('/get_product_count')
+                .then(response => response.json())
+                .then(data => {
+                    const productCountEl = document.getElementById('product-count-display');
+                    
+                    // Add 'changed' class if count is different
+                    if (data.count !== previousCount) {
+                        productCountEl.classList.add('changed');
+                        
+                        // Remove the class after animation
+                        setTimeout(() => {
+                            productCountEl.classList.remove('changed');
+                        }, 1000);
+                    }
+
+                    // Update count
+                    productCountEl.textContent = data.count;
+                    
+                    // Update previous count
+                    previousCount = data.count;
+                })
+                .catch(error => console.error('Error fetching product count:', error));
+        }
+        function updateProfit() {
+        fetch('/get_profit')
+                .then(response => response.json())
+                .then(data => {
+                    const profitEl = document.getElementById('profit');
+                    const productCountEl = document.getElementById('product-count-display').textContent;
+                    profitEl.textContent =`₹ ${data.profit * productCountEl}`; ;
+                })
+                .catch(error => console.error('Error fetching Profit count:', error));
+        }
+
+        // Chart configurations
+        const powerChartCtx = document.getElementById('power-chart');
+        const productionChartCtx = document.getElementById('production-chart');
+
+        // Power Consumption Chart
+        const powerChart = new Chart(powerChartCtx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Power Usage',
+                    data: [],
+                    borderColor: '#3b82f6',
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Monthly Production Chart (remains static)
+        const productionChart = new Chart(productionChartCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [
+                    {
+                        label: 'Actual Production',
+                        data: [1200, 1500, 1800, 1300, 1700, 1900],
+                        backgroundColor: '#3b82f6'
+                    },
+                    {
+                        label: 'Target',
+                        data: [1300, 1400, 1500, 1600, 1600, 1700],
+                        backgroundColor: '#ef4444'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Simulate dynamic updates
+        function updateDashboard() {
+            // Generate random power usage between 5 and 15 kW/min
+            const newPowerUsage = (Math.random() * 10 + 5).toFixed(1);
+            powerUsageEl.textContent = `${newPowerUsage} kW/min`;
+
+            // Simulate efficiency between 85% and 95%
+            const efficiency = Math.floor(Math.random() * 10 + 85);
+            efficiencyEl.textContent = `${efficiency}%`;
+
+            // Update power consumption chart
+            const currentTime = new Date().toLocaleTimeString();
+            
+            // Add new data point
+            powerChart.data.labels.push(currentTime);
+            powerChart.data.datasets[0].data.push(parseFloat(newPowerUsage));
+
+            // Limit to last 10 data points
+            if (powerChart.data.labels.length > 10) {
+                powerChart.data.labels.shift();
+                powerChart.data.datasets[0].data.shift();
+            }
+
+            // Update chart
+            powerChart.update();
+        }
+
+        // Update product count every 10 seconds
+        setInterval(updateProductCount, 2000);
+        setInterval(updateProfit, 3000);
+
+        // Initial product count update
+        updateProductCount();
+        updateProfit();
+        // Update dashboard every 2 seconds
+        setInterval(updateDashboard, 2000);
+    </script>
+</body>
+</html>

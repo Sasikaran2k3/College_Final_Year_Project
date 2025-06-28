@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Cost Entry Page</title>
+    <link rel="stylesheet" href="static/CostEntry.css">
+</head>
+<body>
+    <div class="cost-entry">
+        <header>
+            <h1>Cost Entry Page</h1>
+            <a href="/" class="back-button">Back to Dashboard</a>
+        </header>
+        
+        <div id="form-container">
+            <div class="cost-form">
+                <label>
+                    Labour Cost (₹): 
+                    <input type="number" name="labour" id="labour-cost" />
+                </label>
+                <label>
+                    Raw Material Cost (₹): 
+                    <input type="number" name="rawMaterials" id="raw-materials-cost" />
+                </label>
+                <label>
+                    Machinery Maintenance Cost (₹): 
+                    <input type="number" name="maintenance" id="maintenance-cost" />
+                </label>
+                <label>
+                    Electricity Cost Per Unit (₹/kWh): 
+                    <input type="number" name="electricityRate" id="electricity-rate" />
+                </label>
+                <p>Total Power: <span id="total-power">15</span> kWh</p>
+                <p>Electricity Cost: ₹<span id="electricity-cost">0.00</span></p>
+                
+                <div id="custom-costs-container">
+                    <!-- Custom costs will be dynamically added here -->
+                </div>
+                
+                <button id="add-custom-cost" class="add-button">+ Add Custom Cost</button>
+                
+                <div class="mrp-section">
+                    <label>
+                        MRP Per Product (₹): 
+                        <input type="number" name="mrp" id="mrp" />
+                    </label>
+                </div>
+            </div>
+            
+            <div class="cost-summary">
+                <div class="total-cost">Total Cost Per Product: ₹<span id="total-cost">0.00</span></div>
+                <div id="profit-section" style="display:none;">
+                    <div class="profit">Profit Per Product: ₹<span id="profit">0.00</span></div>
+                    <div class="margin">Profit Margin: <span id="margin">0</span>%</div>
+                </div>
+            </div>
+            
+            <div class="submit-section">
+                <button class="submit-button" id="submit-data">Submit Data</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const labourCost = document.getElementById('labour-cost');
+            const rawMaterialsCost = document.getElementById('raw-materials-cost');
+            const maintenanceCost = document.getElementById('maintenance-cost');
+            const electricityRate = document.getElementById('electricity-rate');
+            const totalPower = document.getElementById('total-power');
+            const electricityCost = document.getElementById('electricity-cost');
+            const mrp = document.getElementById('mrp');
+            const totalCost = document.getElementById('total-cost');
+            const profitSection = document.getElementById('profit-section');
+            const profit = document.getElementById('profit');
+            const margin = document.getElementById('margin');
+            const addCustomCostBtn = document.getElementById('add-custom-cost');
+            const customCostsContainer = document.getElementById('custom-costs-container');
+            const submitBtn = document.getElementById('submit-data');
+
+            const inputs = [labourCost, rawMaterialsCost, maintenanceCost, electricityRate, mrp];
+
+            function calculateCosts() {
+                const labour = parseFloat(labourCost.value) || 0;
+                const rawMaterials = parseFloat(rawMaterialsCost.value) || 0;
+                const maintenance = parseFloat(maintenanceCost.value) || 0;
+                const rate = parseFloat(electricityRate.value) || 0;
+                const totalPowerValue = parseFloat(totalPower.textContent) || 0;
+                const mrpValue = parseFloat(mrp.value) || 0;
+
+                const elecCost = (rate * totalPowerValue).toFixed(2);
+                electricityCost.textContent = elecCost;
+
+                let customCostsTotal = 0;
+                const customCosts = [];
+                document.querySelectorAll('.custom-cost').forEach(row => {
+                    const nameInput = row.querySelector('.custom-cost-name');
+                    const amountInput = row.querySelector('.custom-cost-input');
+                    const costName = nameInput.value.trim();
+                    const costAmount = parseFloat(amountInput.value) || 0;
+                    
+                    if (costName && costAmount) {
+                        customCostsTotal += costAmount;
+                        customCosts.push({ name: costName, amount: costAmount });
+                    }
+                });
+
+                const total = (labour + rawMaterials + maintenance + parseFloat(elecCost) + customCostsTotal).toFixed(2);
+                totalCost.textContent = total;
+                let profitValue = 0;
+                let marginValue = 0;
+                if (mrpValue > 0) {
+                    profitValue = (mrpValue - parseFloat(total)).toFixed(2);
+                    marginValue = ((profitValue / mrpValue) * 100).toFixed(2);
+                    
+                    profit.textContent = profitValue;
+                    margin.textContent = marginValue;
+                    profitSection.style.display = 'block';
+                } else {
+                    profitSection.style.display = 'none';
+                }
+
+                return {
+                    labour: labour,
+                    rawMaterials: rawMaterials,
+                    maintenance: maintenance,
+                    electricityRate: rate,
+                    totalPower: totalPowerValue,
+                    electricityCost: parseFloat(elecCost),
+                    customCosts: customCosts,
+                    mrp: mrpValue,
+                    totalCost: parseFloat(total),
+                    profit: parseFloat(profitValue),
+                    margin: parseFloat(marginValue)
+                };
+            }
+
+            inputs.forEach(input => {
+                input.addEventListener('input', calculateCosts);
+            });
+
+            addCustomCostBtn.addEventListener('click', () => {
+                const customCostRow = document.createElement('div');
+                customCostRow.className = 'custom-cost';
+                customCostRow.innerHTML = `
+                    <input type="text" placeholder="Cost Name" class="custom-cost-name">
+                    <input type="number" placeholder="Amount (₹)" class="custom-cost-input">
+                `;
+                customCostsContainer.appendChild(customCostRow);
+
+                customCostRow.querySelector('.custom-cost-input').addEventListener('input', calculateCosts);
+            });
+
+            submitBtn.addEventListener('click', () => {
+                const costData = calculateCosts();
+
+                fetch('/submit-cost', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(costData)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message || 'Data submitted successfully!');
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Failed to submit data');
+                });
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-time Industry Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+
+        .dashboard-card {
+            text-align: center;
+            padding: 30px;
+            border-radius: 10px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        .navbar {
+            background: rgba(0, 0, 0, 0.8);
+        }
+        .clock {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: white;
+        }
+        .chart-container {
+            width: 100%;
+            max-width: 600px;
+        }
+        dashboard-card {
+            text-align: center;
+            padding: 30px;
+            border-radius: 10px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        .dashboard-card::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-size: cover;
+            opacity: 0.2;
+        }
+        .power-card {
+            background-color: #ffcc00;
+        }
+        .power-card::before {
+            background: url('power-card-background.jpg') no-repeat center center/cover;
+        }
+        .profit-card {
+            background-color: #28a745;
+        }
+        .profit-card::before {
+            background: url('profit-card-background.jpg') no-repeat center center/cover;
+        }
+        .machine-card {
+            background-color: #007bff;
+        }
+        .machine-card img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">Industry Dashboard</a>
+            <span class="clock" id="clock"></span>
+        </div>
+    </nav>
+    
+    <div class="container py-5">
+        <h2 class="text-center mb-4">Oil Manufacturing Industry Dashboard</h2>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="dashboard-card bg-warning power-card">
+                    <i class="fas fa-bolt fa-3x"></i>
+                    <h4>Power Consumption</h4>
+                    <h2 id="power">0 kW/min</h2>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="dashboard-card bg-success profit-card">
+                    <i class="fas fa-money-bill-wave fa-3x"></i>
+                    <h4>Profit Per Minute</h4>
+                    <h2 id="profit">₹0</h2>
+                </div>
+            </div>
+        </div>
+        
+        <h4 class="mt-4">Live Metrics</h4>
+        <div class="chart-container">
+            <canvas id="powerChart"></canvas>
+        </div>
+          <h4 class="mt-4">Select Machines</h4>
+        <div class="row mt-2">
+            <div class="col-md-12">
+                <div class="d-flex flex-wrap">
+                    <div class="form-check me-3">
+                        <input class="form-check-input machine" type="checkbox" value="5" id="machine1" checked>
+                        <label class="form-check-label" for="machine1">Cold Press (5kW)</label>
+                    </div>
+                    <div class="form-check me-3">
+                        <input class="form-check-input machine" type="checkbox" value="2" id="machine2" checked>
+                        <label class="form-check-label" for="machine2">Filtration (2kW)</label>
+                    </div>
+                    <div class="form-check me-3">
+                        <input class="form-check-input machine" type="checkbox" value="4" id="machine3" checked>
+                        <label class="form-check-label" for="machine3">Refining (4kW)</label>
+                    </div>
+                    <div class="form-check me-3">
+                        <input class="form-check-input machine" type="checkbox" value="3" id="machine4" checked>
+                        <label class="form-check-label" for="machine4">Bottling (3kW)</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input machine" type="checkbox" value="1" id="machine5" checked>
+                        <label class="form-check-label" for="machine5">Waste Management (1kW)</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-4">
+                <div class="machine-card p-3">
+                    <img src="cold-press.jpg" alt="A close-up of an advanced cold press oil extraction machine.">
+                    <h5>Cold Press Machine</h5>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="machine-card p-3">
+                    <img src="filtration-unit.jpg" alt="A high-tech oil filtration system with visible transparent pipes.">
+                    <h5>Filtration Unit</h5>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="machine-card p-3">
+                    <img src="refining-unit.jpg" alt="A refining unit with multiple heating chambers.">
+                    <h5>Refining Unit</h5>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="machine-card p-3">
+                    <img src="bottling-machine.jpg" alt="An automated bottling and labeling machine filling bottles.">
+                    <h5>Bottling & Labeling Machine</h5>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="machine-card p-3">
+                    <img src="waste-management.jpg" alt="A waste processing unit with oil cake extraction.">
+                    <h5>Waste Management System</h5>
+                </div>
+            </div>
+        </div>
+    </div>
+        <div class="chart-container" >
+        <canvas id="powerPieChart"></canvas>
+        </div>
+        <div class="chart-container">
+        <canvas id="productionBarChart"></canvas>
+        </div>
+    </div>
+    
+    <script>
+    const productionBarCtx = document.getElementById('productionBarChart').getContext('2d');
+    new Chart(productionBarCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [{
+                label: 'Oil Production (L)',
+                data: [1200, 1500, 1800, 1300, 1700, 1900],
+                backgroundColor: '#007bff'
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+    const powerPieCtx = document.getElementById('powerPieChart').getContext('2d');
+    new Chart(powerPieCtx, {
+        type: 'pie',
+        data: {
+            labels: ['Cold Press', 'Filtration', 'Refining', 'Bottling', 'Waste Mgmt'],
+            datasets: [{
+                data: [5, 2, 4, 3, 1], 
+                backgroundColor: ['#ffcc00', '#28a745', '#007bff', '#dc3545', '#6c757d']
+            }]
+        },
+        options: {
+            responsive: true
+        }
+    });
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('clock').innerText = now.toLocaleTimeString();
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+        
+        let powerChart = new Chart(document.getElementById('powerChart').getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Power Usage (kW/min)',
+                    data: [],
+                    borderColor: 'orange',
+                    fill: false,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+            }
+        });
+        
+        function updateDashboard() {
+            let power = Math.random() * 10;
+            document.getElementById('power').innerText = power.toFixed(1) + ' kW/min';
+            document.getElementById('profit').innerText = '₹' + (power * 15).toFixed(2);
+            
+            powerChart.data.labels.push(new Date().toLocaleTimeString());
+            powerChart.data.datasets[0].data.push(power);
+            if (powerChart.data.labels.length > 10) {
+                powerChart.data.labels.shift();
+                powerChart.data.datasets[0].data.shift();
+            }
+            powerChart.update();
+        }
+        setInterval(updateDashboard, 2000);
+        updateDashboard();
+    </script>
+</body>
+</html>
+
